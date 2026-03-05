@@ -56,7 +56,10 @@ body {
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px;
-  position: sticky; top: 0; z-index: 200;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+}
+.app {
+  margin-top: var(--header-h);
 }
 .logo { font-size: 18px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
 .logo span { color: var(--text); }
@@ -496,6 +499,7 @@ body {
 .phase-hdr:hover { background: var(--bg); }
 .ph-num { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0; }
 .ph-num.done-num { background: var(--green); }
+.ph-num.active-num { background: var(--accent); }
 .ph-title { font-size: 14px; font-weight: 800; color: var(--text); }
 .ph-meta { font-size: 12px; color: var(--text-mid); font-weight: 500; }
 .ph-status { margin-left: auto; font-size: 11px; font-weight: 700; border-radius: 20px; padding: 3px 10px; border: 1.5px solid; }
@@ -2345,6 +2349,11 @@ function autoMarkPlan(taskId) {
     addXP(15);
     save();
     toast('📅 Günlük plan güncellendi! +15 XP','success');
+    // Program görevlerini de otomatik güncelle
+    autoCheckProgTasks();
+    // Tüm görevler tamam mı?
+    const allDone = planItems.every(p=>ST.planDone[today+'-'+p.id]);
+    if(allDone) { addXP(20); toast('🎉 Günlük planın tamam! +20 XP Bonus!','info'); }
   }
 }
 
@@ -2434,39 +2443,55 @@ function buildWeekGrid(id) {
    DAILY PLAN
 ═══════════════════════════════════════════════════ */
 const planItems=[
-  {id:'vocab',icon:'📖',title:'Kelime Quiz',desc:'10 yeni kelime öğren veya quiz çöz',dur:'15 dk',action:()=>nav('quiz'),color:'var(--yellow-bg)',border:'var(--yellow-border)'},
+  {id:'vocab',icon:'📖',title:'Kelime Quiz',desc:'Quiz çöz veya kelime bankasını incele',dur:'15 dk',action:()=>nav('quiz'),color:'var(--yellow-bg)',border:'var(--yellow-border)'},
   {id:'lesson',icon:'📚',title:'Ders Çalış',desc:'Sıradaki mini dersi tamamla',dur:'15 dk',action:()=>nav('lessons'),color:'var(--accent-bg)',border:'rgba(79,70,229,.25)'},
-  {id:'pronun',icon:'🗣️',title:'Telaffuz Pratiği',desc:'5 kelime veya cümleyi sesli söyle',dur:'15 dk',action:()=>nav('pronun'),color:'var(--green-bg)',border:'var(--green-border)'},
-  {id:'chat',icon:'💬',title:'AI ile Konuş',desc:'5 Almanca cümle kur, hatanı düzelt',dur:'15 dk',action:()=>nav('chat'),color:'var(--blue-bg)',border:'#93c5fd'},
+  {id:'pronun',icon:'🗣️',title:'Telaffuz Pratiği',desc:'Kelimeleri sesli söyle ve pratik yap',dur:'15 dk',action:()=>nav('pronun'),color:'var(--green-bg)',border:'var(--green-border)'},
+  {id:'chat',icon:'💬',title:'AI ile Konuş',desc:'Almanca yaz, hatalarını düzelt',dur:'15 dk',action:()=>nav('chat'),color:'var(--blue-bg)',border:'#93c5fd'},
 ];
+
 function renderPlan() {
   const today = new Date().toDateString();
-  document.getElementById('plan-list').innerHTML = planItems.map(p=>{
+  const doneCnt = planItems.filter(p => ST.planDone[today+'-'+p.id]).length;
+  const pct = Math.round(doneCnt / planItems.length * 100);
+
+  // Üst ilerleme barı
+  let html = `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:800;color:var(--text)">Bugünkü İlerleme</div>
+        <div style="font-size:13px;font-weight:900;color:${pct===100?'var(--green)':'var(--accent)'}">%${pct}</div>
+      </div>
+      <div style="background:var(--border);border-radius:99px;height:10px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${pct===100?'var(--green)':'var(--accent)'};border-radius:99px;transition:width .4s ease"></div>
+      </div>
+      ${pct===100?`<div style="text-align:center;margin-top:10px;font-size:13px;font-weight:800;color:var(--green)">🎉 Günlük planın tamam! Harika iş!</div>`:''}
+    </div>`;
+
+  html += planItems.map(p => {
     const key = today+'-'+p.id;
     const done = ST.planDone[key];
-    return `<div class="plan-item ${done?'done':''}" onclick="togglePlan('${p.id}','${today}')">
-      <div class="plan-emoji" style="background:${p.color};border:1.5px solid ${p.border}">${p.icon}</div>
+    return `
+    <div class="plan-item ${done?'done':''}" onclick="planItems.find(x=>x.id==='${p.id}').action()" style="cursor:pointer">
+      <div class="plan-emoji" style="background:${p.color};border:1.5px solid ${p.border}">${done?'✓':p.icon}</div>
       <div class="plan-info">
-        <div class="plan-name">${p.title}</div>
-        <div class="plan-desc">${p.desc}</div>
+        <div class="plan-name" style="${done?'text-decoration:line-through;opacity:.6':''}">${p.title}</div>
+        <div class="plan-desc">${done?'Tamamlandı ✓':p.desc}</div>
       </div>
       <div class="plan-right">
         <span class="plan-dur">${p.dur}</span>
-        <div class="plan-check">${done?'✓':''}</div>
+        <div class="plan-check" style="background:${done?'var(--green)':'var(--border)'};color:${done?'#fff':'transparent'};border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">${done?'✓':''}</div>
       </div>
     </div>`;
   }).join('');
+
+  document.getElementById('plan-list').innerHTML = html;
   buildWeekGrid('plan-week-grid');
 }
+
 function togglePlan(id, today) {
-  const key = today+'-'+id;
-  ST.planDone[key] = !ST.planDone[key];
-  if (ST.planDone[key]) addXP(15);
-  save(); renderPlan();
-  if (ST.planDone[key]) toast('Görev tamamlandı! +15 XP ⚡','success');
-  const allDone = planItems.every(p=>ST.planDone[today+'-'+p.id]);
-  if (allDone) { addXP(20); toast('🎉 Günlük planın tamam! +20 XP Bonus!','info'); }
+  // Artık kullanılmıyor — autoMarkPlan ile otomatik
 }
+
 
 /* ═══════════════════════════════════════════════════
    LESSONS
@@ -3020,36 +3045,123 @@ function useChip(el){document.getElementById('chat-inp').value=el.textContent;se
 /* ═══════════════════════════════════════════════════
    PROGRAM
 ═══════════════════════════════════════════════════ */
+function autoCheckProgTasks() {
+  // Faz 1 görevleri — otomatik kontrol
+  const checks = {
+    '0-0': true, // Uygulamayı açtı — zaten burada
+    '0-1': ST.studyDays.length >= 1,
+    '0-2': ST.completedLessons.includes(0),
+    '0-3': ST.completedLessons.includes(1),
+    '0-4': ST.sessions >= 3,
+    '0-5': ST.completedLessons.some(i => miniLessons[i]?.title?.includes('der/die')),
+    '0-6': ST.quizHistory.some(q => q >= 80),
+    '0-7': ST.xp >= 50,
+    '0-8': ST.sessions >= 5,
+    '0-9': ST.studyDays.length >= 7,
+    // Faz 2
+    '1-0': ST.completedLessons.length >= 5,
+    '1-1': ST.completedLessons.length >= 6,
+    '1-2': ST.sessions >= 8,
+    '1-3': ST.completedLessons.includes(3) && ST.completedLessons.includes(4) && ST.completedLessons.includes(5),
+    '1-4': ST.quizHistory.filter(q=>q>=70).length >= 3,
+    '1-5': ST.sessions >= 10,
+    '1-6': ST.studyDays.length >= 10,
+    '1-7': ST.sessions >= 12,
+    '1-8': ST.studyDays.length >= 12,
+    '1-9': Object.values(ST.planDone).filter(Boolean).length >= 16,
+    // Faz 3
+    '2-0': ST.completedLessons.length >= 10,
+    '2-1': ST.sessions >= 15,
+    '2-2': ST.completedLessons.includes(6) && ST.completedLessons.includes(7),
+    '2-3': ST.xp >= 300,
+    '2-4': ST.completedLessons.length >= 12,
+    '2-5': ST.sessions >= 18,
+    '2-6': ST.studyDays.length >= 20,
+    '2-7': ST.studyDays.length >= 22,
+    // Faz 4
+    '3-0': ST.completedLessons.length >= 18,
+    '3-1': ST.xp >= 500,
+    '3-2': ST.sessions >= 25,
+    '3-3': ST.quizHistory.filter(q=>q>=90).length >= 1,
+    '3-4': ST.completedLessons.length >= 22,
+    '3-5': ST.studyDays.length >= 28,
+    '3-6': ST.sessions >= 30,
+    '3-7': ST.xp >= 800,
+    '3-8': ST.studyDays.length >= 30,
+  };
+  let changed = false;
+  Object.entries(checks).forEach(([k,v]) => {
+    if(v && !ST.checkedTasks[k]) { ST.checkedTasks[k]=true; changed=true; }
+  });
+  if(changed) save();
+}
+
 function renderProg(){
-  document.getElementById('prog-grid').innerHTML=programData.map((p,pi)=>`
+  autoCheckProgTasks();
+  const totalTasks = programData.reduce((s,p)=>s+p.tasks.length,0);
+  const doneTasks = Object.values(ST.checkedTasks).filter(Boolean).length;
+  const overallPct = Math.round(doneTasks/totalTasks*100);
+
+  // Genel ilerleme barı
+  let html = `
+    <div class="panel" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:800">30 Günlük Program İlerlemesi</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent)">%${overallPct}</div>
+      </div>
+      <div style="background:var(--border);border-radius:99px;height:12px;overflow:hidden;margin-bottom:8px">
+        <div style="height:100%;width:${overallPct}%;background:linear-gradient(90deg,var(--accent),var(--accent-light));border-radius:99px;transition:width .5s ease"></div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;font-weight:700;color:var(--text-mid)">
+        <span>✓ ${doneTasks} görev</span>
+        <span>📚 ${ST.completedLessons.length} ders</span>
+        <span>📅 ${ST.studyDays.length} gün</span>
+        <span>⚡ ${ST.xp} XP</span>
+      </div>
+    </div>`;
+
+  html += programData.map((p,pi)=>{
+    const done = cntDone(pi);
+    const total = p.tasks.length;
+    const pct = Math.round(done/total*100);
+    const isActive = pi === programData.findIndex((_,i) => cntDone(i) < programData[i].tasks.length);
+    const isDone = done === total;
+    return `
     <div class="phase-card">
       <div class="phase-hdr" onclick="togPhase(${pi})">
-        <div class="ph-num ${p.status==='done'?'done-num':''}">${p.status==='done'?'✓':pi+1}</div>
-        <div>
+        <div class="ph-num ${isDone?'done-num':isActive?'active-num':''}">${isDone?'✓':isActive?'▶':pi+1}</div>
+        <div style="flex:1;min-width:0">
           <div class="ph-title">${p.title}</div>
-          <div class="ph-meta">${p.dur} · ${cntDone(pi)}/${p.tasks.length} tamamlandı</div>
+          <div class="ph-meta">${p.dur} · ${done}/${total} tamamlandı</div>
+          <div style="background:var(--border);border-radius:99px;height:6px;overflow:hidden;margin-top:6px">
+            <div style="height:100%;width:${pct}%;background:${isDone?'var(--green)':isActive?'var(--accent)':'var(--text-dim)'};border-radius:99px;transition:width .4s"></div>
+          </div>
         </div>
-        <div class="ph-status ${p.status==='active'?'ph-active':p.status==='done'?'ph-done':'ph-upcoming'}">${p.status==='active'?'▶ Aktif':p.status==='done'?'✓ Bitti':'○ Bekliyor'}</div>
+        <div class="ph-status ${isActive?'ph-active':isDone?'ph-done':'ph-upcoming'}">${isActive?'▶ Aktif':isDone?'✓ Bitti':'○ Bekliyor'}</div>
       </div>
-      <div class="phase-body ${p.status==='active'?'open':''}" id="phb-${pi}">
+      <div class="phase-body ${isActive?'open':''}" id="phb-${pi}">
         <ul class="task-list">
-          ${p.tasks.map((t,ti)=>`
-            <li class="task-item ${ST.checkedTasks[pi+'-'+ti]?'checked':''}" onclick="togTask(${pi},${ti})">
-              <div class="task-chk">${ST.checkedTasks[pi+'-'+ti]?'✓':''}</div>
-              <span>${t}</span>
-            </li>`).join('')}
+          ${p.tasks.map((t,ti)=>{
+            const checked = ST.checkedTasks[pi+'-'+ti];
+            return `<li class="task-item ${checked?'checked':''}" style="pointer-events:none;opacity:${checked?1:0.6}">
+              <div class="task-chk" style="background:${checked?'var(--green)':'var(--border)'};color:${checked?'#fff':'transparent'};border-radius:50%;width:20px;height:20px;min-width:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${checked?'✓':''}</div>
+              <span style="${checked?'text-decoration:line-through;color:var(--text-dim)':''}">${t}</span>
+            </li>`;
+          }).join('')}
         </ul>
+        ${!isDone?`<div style="margin-top:12px;padding:10px 14px;background:var(--accent-bg);border-radius:10px;font-size:12px;font-weight:700;color:var(--accent)">
+          💡 Aktiviteler yaptıkça görevler otomatik tamamlanır
+        </div>`:''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+
+  document.getElementById('prog-grid').innerHTML = html;
 }
+
 function cntDone(pi){return programData[pi].tasks.filter((_,ti)=>ST.checkedTasks[pi+'-'+ti]).length;}
 function togPhase(i){document.getElementById('phb-'+i).classList.toggle('open');}
-function togTask(pi,ti){
-  const k=pi+'-'+ti;ST.checkedTasks[k]=!ST.checkedTasks[k];
-  if(ST.checkedTasks[k])addXP(10);
-  save();renderProg();updateUI();
-  if(ST.checkedTasks[k])toast('Görev tamam! +10 XP ✓','success');
-}
+function togTask(pi,ti){ /* artık manuel değil */ }
 
 /* ═══════════════════════════════════════════════════
    TOAST
