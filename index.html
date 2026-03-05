@@ -115,7 +115,7 @@ body {
 .page.active { display: block; animation: fadeUp .22s ease; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
 
-.page-header { margin-bottom: 24px; }
+.page-header { margin-bottom: 24px; padding-left: 2px; }
 .page-title { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 3px; }
 .page-sub { font-size: 13px; color: var(--text-mid); font-weight: 500; }
 
@@ -386,8 +386,21 @@ body {
 .vocab-table tr:hover td { background: var(--bg); }
 .vb-de { font-weight: 800; color: var(--accent); }
 .vb-cat-badge { font-size: 10px; font-weight: 700; border: 1.5px solid var(--border); border-radius: 20px; padding: 2px 8px; color: var(--text-mid); background: var(--bg); }
-.vb-spk { background: none; border: none; font-size: 14px; cursor: pointer; opacity: .5; transition: opacity .15s; }
+.vb-spk { background: none; border: none; font-size: 18px; cursor: pointer; opacity: .6; transition: opacity .15s; padding: 6px; min-width: 36px; min-height: 36px; display:flex; align-items:center; justify-content:center; }
 .vb-spk:hover { opacity: 1; }
+
+/* Mobil kelime kartı */
+.vb-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.vb-card:last-child { border-bottom: none; }
+.vb-card-left { flex: 1; min-width: 0; }
+.vb-card-de { font-weight: 800; color: var(--accent); font-size: 14px; }
+.vb-card-tr { color: var(--text-mid); font-size: 12px; font-weight: 600; margin-top: 2px; }
+.vb-card-meta { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.vb-card-badge { font-size: 10px; font-weight: 700; border: 1.5px solid var(--border); border-radius: 20px; padding: 1px 7px; color: var(--text-mid); background: var(--bg); }
 
 /* ── GRAMMAR ─────────────────────────────────────────── */
 .gram-grid { display: flex; flex-direction: column; gap: 12px; }
@@ -423,7 +436,7 @@ body {
 .ex-block { background: var(--bg); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text-mid); font-weight: 500; line-height: 1.8; }
 
 /* ── CHAT ─────────────────────────────────────────── */
-.chat-layout { display: grid; grid-template-columns: 1fr 260px; gap: 16px; height: calc(100vh - var(--header-h) - 130px); }
+.chat-layout { display: grid; grid-template-columns: 1fr 260px; gap: 16px; height: calc(100vh - var(--header-h) - 180px); min-height: 400px; }
 .chat-main { display: flex; flex-direction: column; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
 .chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .msg { display: flex; }
@@ -443,6 +456,7 @@ body {
 .chat-input-area {
   padding: 12px 14px; border-top: 1.5px solid var(--border);
   display: flex; gap: 8px; align-items: flex-end;
+  flex-shrink: 0;
 }
 .chat-input {
   flex: 1; background: var(--bg); border: 1.5px solid var(--border);
@@ -590,13 +604,24 @@ body {
 .more-btn .mb-icon { font-size: 26px; }
 
 @media (max-width: 900px) {
-  .app { grid-template-columns: 1fr; }
+  html, body { height: auto; overflow: auto; }
+  .app { 
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
   .sidebar { display: none; }
   .mobile-nav { display: block; }
   .content {
-    padding: 16px 14px calc(80px + env(safe-area-inset-bottom,0px)) 14px;
-    max-height: none; overflow-y: auto;
+    padding: 16px 16px 0 16px;
+    max-height: none;
+    overflow-y: visible;
   }
+  /* Sayfa içeriği — menü yüksekliği + extra boşluk */
+  .page.active {
+    padding-bottom: calc(85px + env(safe-area-inset-bottom, 16px));
+  }
+  #page-chat.active { padding-bottom: 0 !important; }
+
   .two-col, .chat-layout { grid-template-columns: 1fr; }
   .stat-row { grid-template-columns: 1fr 1fr; }
   .three-col { grid-template-columns: 1fr 1fr; }
@@ -608,6 +633,46 @@ body {
   .chat-sidebar { display: none; }
   .page-title { font-size: 18px; }
   .panel { padding: 14px; }
+
+  /* Chat klavye düzeltmesi - sadece mobilde */
+  #page-chat.active {
+    display: flex !important; flex-direction: column;
+    height: calc(100dvh - var(--header-h) - 70px);
+    overflow: hidden;
+    padding-bottom: 0 !important;
+  }
+  #page-chat .page-header { flex-shrink: 0; margin-bottom: 10px; }
+  #page-chat .chat-layout {
+    flex: 1; min-height: 0;
+    display: flex !important; flex-direction: column;
+    height: auto !important;
+  }
+  #page-chat .chat-main {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  #page-chat .chat-msgs {
+    flex: 1; min-height: 0; overflow-y: auto;
+  }
+  #page-chat .chat-input-area {
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+
+  /* Kelime bankası tablo yerine kart */
+  .vocab-table thead { display: none; }
+  .vocab-table tbody tr {
+    display: flex; align-items: center;
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .vocab-table td { padding: 0; border: none; }
+  .vocab-table td:nth-child(1) { flex: 1; font-weight: 800; color: var(--accent); font-size: 14px; }
+  .vocab-table td:nth-child(2) { flex: 1; color: var(--text-mid); font-size: 12px; font-weight: 600; }
+  .vocab-table td:nth-child(3),
+  .vocab-table td:nth-child(4) { display: none; }
+  .vocab-table td:nth-child(5) { flex-shrink: 0; }
+  .vb-spk { font-size: 20px; padding: 8px; min-width: 40px; min-height: 40px; opacity: 0.7; }
 }
 
 /* DARK MODE */
@@ -673,6 +738,8 @@ body {
       <div class="nav-item" onclick="nav('vocab')"><span class="nav-icon">📖</span>Kelime Bankası</div>
       <div class="nav-item" onclick="nav('grammar')"><span class="nav-icon">🔤</span>Gramer</div>
       <div class="nav-item" onclick="nav('chat')"><span class="nav-icon">💬</span>AI Pratik</div>
+      <div class="nav-item" onclick="nav('game')"><span class="nav-icon">🎮</span>Kelime Oyunu</div>
+      <div class="nav-item" onclick="nav('writing')"><span class="nav-icon">✍️</span>Yazma Egzersizi</div>
     </div>
     <div class="nav-group">
       <div class="nav-label">Takip</div>
@@ -726,6 +793,12 @@ body {
         <button class="more-btn" onclick="nav('grammar');setMnav('grammar');closeMore()">
           <span class="mb-icon">🔤</span>Gramer
         </button>
+        <button class="more-btn" onclick="nav('game');setMnav('game');closeMore()">
+          <span class="mb-icon">🎮</span>Kelime Oyunu
+        </button>
+        <button class="more-btn" onclick="nav('writing');setMnav('writing');closeMore()">
+          <span class="mb-icon">✍️</span>Yazma Egzersizi
+        </button>
         <button class="more-btn" onclick="nav('program');setMnav('program');closeMore()">
           <span class="mb-icon">🗺️</span>1 Ay Programı
         </button>
@@ -775,6 +848,21 @@ body {
             <div class="qb-icon">💬</div>
             <div class="qb-title" style="color:var(--green)">AI ile Konuş</div>
             <div class="qb-desc" style="color:var(--green)">Pratik yap</div>
+          </div>
+          <div class="quick-btn" style="background:var(--blue-bg);border-color:#93c5fd" onclick="nav('game')">
+            <div class="qb-icon">🎮</div>
+            <div class="qb-title" style="color:var(--blue)">Kelime Oyunu</div>
+            <div class="qb-desc" style="color:var(--blue)">Hızlı eşleştir</div>
+          </div>
+          <div class="quick-btn" style="background:var(--red-bg);border-color:var(--red-border)" onclick="nav('writing')">
+            <div class="qb-icon">✍️</div>
+            <div class="qb-title" style="color:var(--red)">Yazma Egzersizi</div>
+            <div class="qb-desc" style="color:var(--red)">Cümle çevir</div>
+          </div>
+          <div class="quick-btn" style="background:var(--yellow-bg);border-color:var(--yellow-border)" onclick="requestNotifPermission()">
+            <div class="qb-icon">🔔</div>
+            <div class="qb-title" style="color:var(--yellow)">Hatırlatıcı</div>
+            <div class="qb-desc" style="color:var(--yellow)">Günlük bildirim</div>
           </div>
         </div>
       </div>
@@ -905,6 +993,41 @@ body {
       </div>
     </div>
 
+    <!-- ════ KELIME OYUNU ════ -->
+    <div class="page" id="page-game">
+      <div class="page-header">
+        <div class="page-title">Kelime Oyunu 🎮</div>
+        <div class="page-sub">Süre baskısıyla eşleştir — ne kadar hızlısın?</div>
+      </div>
+      <div class="panel" style="text-align:center" id="game-panel">
+        <div id="game-score-row" style="display:flex;justify-content:center;gap:24px;margin-bottom:20px">
+          <div style="text-align:center"><div style="font-size:28px;font-weight:900;color:var(--accent)" id="g-score">0</div><div style="font-size:11px;color:var(--text-dim);font-weight:700">PUAN</div></div>
+          <div style="text-align:center"><div style="font-size:28px;font-weight:900;color:var(--green)" id="g-streak">0</div><div style="font-size:11px;color:var(--text-dim);font-weight:700">SERİ</div></div>
+          <div style="text-align:center"><div style="font-size:28px;font-weight:900;color:var(--red)" id="g-timer">30</div><div style="font-size:11px;color:var(--text-dim);font-weight:700">SANİYE</div></div>
+        </div>
+        <div id="game-word" style="font-size:32px;font-weight:900;color:var(--accent);margin:20px 0;min-height:44px"></div>
+        <div id="game-opts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:400px;margin:0 auto"></div>
+        <div id="game-start" style="margin-top:16px">
+          <button onclick="startGame()" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px 36px;font-size:16px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif">🎮 Oyunu Başlat</button>
+          <div style="margin-top:12px;font-size:12px;color:var(--text-dim);font-weight:600">30 saniyede olabildiğince çok kelime bil!</div>
+        </div>
+        <div id="game-result" style="display:none;margin-top:16px">
+          <div style="font-size:22px;font-weight:900;color:var(--accent)" id="g-final-score"></div>
+          <div style="font-size:14px;color:var(--text-mid);font-weight:600;margin:8px 0" id="g-final-msg"></div>
+          <button onclick="startGame()" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;margin-top:8px">🔄 Tekrar Oyna</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ YAZMA EGZERSİZİ ════ -->
+    <div class="page" id="page-writing">
+      <div class="page-header">
+        <div class="page-title">Yazma Egzersizi ✍️</div>
+        <div class="page-sub">Türkçe cümleyi Almancaya çevir, anında kontrol et</div>
+      </div>
+      <div id="writing-container"></div>
+    </div>
+
     <!-- ════ PROGRAM ════ -->
     <div class="page" id="page-program">
       <div class="page-header">
@@ -930,12 +1053,15 @@ body {
    DATA
 ═══════════════════════════════════════════════════ */
 const vocabulary = [
-  // Temel
+  // ── TEMEL ──────────────────────────────────────
   {de:"ich",tr:"ben",cat:"Temel",type:"zamir"},
   {de:"du",tr:"sen",cat:"Temel",type:"zamir"},
-  {de:"er / sie / es",tr:"o",cat:"Temel",type:"zamir"},
+  {de:"er",tr:"o (erkek)",cat:"Temel",type:"zamir"},
+  {de:"sie",tr:"o (kadın) / onlar",cat:"Temel",type:"zamir"},
+  {de:"es",tr:"o (nötr)",cat:"Temel",type:"zamir"},
   {de:"wir",tr:"biz",cat:"Temel",type:"zamir"},
-  {de:"sie / Sie",tr:"onlar / resmi siz",cat:"Temel",type:"zamir"},
+  {de:"ihr",tr:"siz (yakın)",cat:"Temel",type:"zamir"},
+  {de:"Sie",tr:"siz (resmi)",cat:"Temel",type:"zamir"},
   {de:"ja",tr:"evet",cat:"Temel",type:"zarf"},
   {de:"nein",tr:"hayır",cat:"Temel",type:"zarf"},
   {de:"bitte",tr:"lütfen / rica ederim",cat:"Temel",type:"kalıp"},
@@ -944,9 +1070,29 @@ const vocabulary = [
   {de:"nicht",tr:"değil",cat:"Temel",type:"zarf"},
   {de:"auch",tr:"de / da / ayrıca",cat:"Temel",type:"zarf"},
   {de:"sehr",tr:"çok",cat:"Temel",type:"zarf"},
-  // Fiiller
-  {de:"sein (bin/bist/ist)",tr:"olmak",cat:"Fiil",type:"fiil"},
-  {de:"haben (habe/hast/hat)",tr:"sahip olmak",cat:"Fiil",type:"fiil"},
+  {de:"hier",tr:"burada",cat:"Temel",type:"zarf"},
+  {de:"da",tr:"orada / işte",cat:"Temel",type:"zarf"},
+  {de:"so",tr:"böyle / öyle",cat:"Temel",type:"zarf"},
+  {de:"noch",tr:"hâlâ / henüz",cat:"Temel",type:"zarf"},
+  {de:"schon",tr:"zaten / artık",cat:"Temel",type:"zarf"},
+  {de:"nur",tr:"sadece / yalnızca",cat:"Temel",type:"zarf"},
+  {de:"aber",tr:"ama / fakat",cat:"Temel",type:"bağlaç"},
+  {de:"und",tr:"ve",cat:"Temel",type:"bağlaç"},
+  {de:"oder",tr:"veya / ya da",cat:"Temel",type:"bağlaç"},
+  {de:"weil",tr:"çünkü",cat:"Temel",type:"bağlaç"},
+  {de:"dass",tr:"ki / olduğunu",cat:"Temel",type:"bağlaç"},
+  {de:"wenn",tr:"eğer / -ince",cat:"Temel",type:"bağlaç"},
+  {de:"obwohl",tr:"rağmen",cat:"Temel",type:"bağlaç"},
+  {de:"vielleicht",tr:"belki",cat:"Temel",type:"zarf"},
+  {de:"natürlich",tr:"tabii ki / doğal olarak",cat:"Temel",type:"zarf"},
+  {de:"leider",tr:"ne yazık ki / maalesef",cat:"Temel",type:"zarf"},
+  {de:"eigentlich",tr:"aslında",cat:"Temel",type:"zarf"},
+  {de:"ungefähr",tr:"yaklaşık / aşağı yukarı",cat:"Temel",type:"zarf"},
+
+  // ── FİİLLER ──────────────────────────────────────
+  {de:"sein",tr:"olmak",cat:"Fiil",type:"fiil"},
+  {de:"haben",tr:"sahip olmak",cat:"Fiil",type:"fiil"},
+  {de:"werden",tr:"olmak (gelecek) / -e dönüşmek",cat:"Fiil",type:"fiil"},
   {de:"gehen",tr:"gitmek",cat:"Fiil",type:"fiil"},
   {de:"kommen",tr:"gelmek",cat:"Fiil",type:"fiil"},
   {de:"machen",tr:"yapmak",cat:"Fiil",type:"fiil"},
@@ -957,58 +1103,323 @@ const vocabulary = [
   {de:"lernen",tr:"öğrenmek",cat:"Fiil",type:"fiil"},
   {de:"verstehen",tr:"anlamak",cat:"Fiil",type:"fiil"},
   {de:"kaufen",tr:"satın almak",cat:"Fiil",type:"fiil"},
-  {de:"können",tr:"yapabilmek (modal)",cat:"Fiil",type:"modal"},
-  {de:"müssen",tr:"zorunda olmak (modal)",cat:"Fiil",type:"modal"},
-  {de:"wollen",tr:"istemek (modal)",cat:"Fiil",type:"modal"},
-  {de:"dürfen",tr:"izni olmak (modal)",cat:"Fiil",type:"modal"},
+  {de:"essen",tr:"yemek",cat:"Fiil",type:"fiil"},
+  {de:"trinken",tr:"içmek",cat:"Fiil",type:"fiil"},
+  {de:"schlafen",tr:"uyumak",cat:"Fiil",type:"fiil"},
+  {de:"lesen",tr:"okumak",cat:"Fiil",type:"fiil"},
+  {de:"schreiben",tr:"yazmak",cat:"Fiil",type:"fiil"},
+  {de:"hören",tr:"duymak / dinlemek",cat:"Fiil",type:"fiil"},
+  {de:"sehen",tr:"görmek",cat:"Fiil",type:"fiil"},
+  {de:"fahren",tr:"araçla gitmek / sürmek",cat:"Fiil",type:"fiil"},
+  {de:"fliegen",tr:"uçmak",cat:"Fiil",type:"fiil"},
+  {de:"laufen",tr:"koşmak / yürümek",cat:"Fiil",type:"fiil"},
+  {de:"nehmen",tr:"almak",cat:"Fiil",type:"fiil"},
+  {de:"geben",tr:"vermek",cat:"Fiil",type:"fiil"},
+  {de:"bringen",tr:"getirmek",cat:"Fiil",type:"fiil"},
+  {de:"finden",tr:"bulmak",cat:"Fiil",type:"fiil"},
+  {de:"denken",tr:"düşünmek",cat:"Fiil",type:"fiil"},
+  {de:"wissen",tr:"bilmek",cat:"Fiil",type:"fiil"},
+  {de:"kennen",tr:"tanımak",cat:"Fiil",type:"fiil"},
+  {de:"brauchen",tr:"ihtiyacı olmak",cat:"Fiil",type:"fiil"},
+  {de:"suchen",tr:"aramak",cat:"Fiil",type:"fiil"},
+  {de:"helfen",tr:"yardım etmek",cat:"Fiil",type:"fiil"},
+  {de:"fragen",tr:"sormak",cat:"Fiil",type:"fiil"},
+  {de:"antworten",tr:"cevaplamak",cat:"Fiil",type:"fiil"},
+  {de:"warten",tr:"beklemek",cat:"Fiil",type:"fiil"},
+  {de:"beginnen",tr:"başlamak",cat:"Fiil",type:"fiil"},
+  {de:"aufhören",tr:"bırakmak / durdurmak",cat:"Fiil",type:"fiil"},
+  {de:"bleiben",tr:"kalmak",cat:"Fiil",type:"fiil"},
+  {de:"stehen",tr:"durmak / ayakta olmak",cat:"Fiil",type:"fiil"},
+  {de:"sitzen",tr:"oturmak",cat:"Fiil",type:"fiil"},
+  {de:"liegen",tr:"yatmak / uzanmak",cat:"Fiil",type:"fiil"},
+  {de:"öffnen",tr:"açmak",cat:"Fiil",type:"fiil"},
+  {de:"schließen",tr:"kapatmak",cat:"Fiil",type:"fiil"},
+  {de:"bezahlen",tr:"ödemek",cat:"Fiil",type:"fiil"},
+  {de:"bestellen",tr:"sipariş vermek",cat:"Fiil",type:"fiil"},
+  {de:"reservieren",tr:"rezervasyon yapmak",cat:"Fiil",type:"fiil"},
+  {de:"reisen",tr:"seyahat etmek",cat:"Fiil",type:"fiil"},
+  {de:"umziehen",tr:"taşınmak",cat:"Fiil",type:"fiil"},
+  {de:"anmelden",tr:"kayıt yaptırmak",cat:"Fiil",type:"fiil"},
+  {de:"unterschreiben",tr:"imzalamak",cat:"Fiil",type:"fiil"},
+  {de:"ausfüllen",tr:"form doldurmak",cat:"Fiil",type:"fiil"},
+  {de:"erklären",tr:"açıklamak",cat:"Fiil",type:"fiil"},
+  {de:"empfehlen",tr:"tavsiye etmek",cat:"Fiil",type:"fiil"},
+  {de:"vergessen",tr:"unutmak",cat:"Fiil",type:"fiil"},
+  {de:"erinnern",tr:"hatırlamak",cat:"Fiil",type:"fiil"},
+  {de:"versuchen",tr:"denemek",cat:"Fiil",type:"fiil"},
+  {de:"passieren",tr:"olmak / geçmek",cat:"Fiil",type:"fiil"},
+
+  // ── MODAL FİİLLER ──────────────────────────────────────
+  {de:"können",tr:"yapabilmek",cat:"Fiil",type:"modal"},
+  {de:"müssen",tr:"zorunda olmak",cat:"Fiil",type:"modal"},
+  {de:"wollen",tr:"istemek",cat:"Fiil",type:"modal"},
+  {de:"dürfen",tr:"izni olmak",cat:"Fiil",type:"modal"},
+  {de:"sollen",tr:"yapması gerekmek",cat:"Fiil",type:"modal"},
   {de:"möchten",tr:"isterim / istiyorum",cat:"Fiil",type:"modal"},
-  // Ev & Aile
+
+  // ── EV & EŞYA ──────────────────────────────────────
   {de:"das Haus",tr:"ev",cat:"Ev",type:"isim"},
   {de:"die Wohnung",tr:"daire",cat:"Ev",type:"isim"},
   {de:"das Zimmer",tr:"oda",cat:"Ev",type:"isim"},
   {de:"die Küche",tr:"mutfak",cat:"Ev",type:"isim"},
-  {de:"das Bad",tr:"banyo",cat:"Ev",type:"isim"},
+  {de:"das Badezimmer",tr:"banyo",cat:"Ev",type:"isim"},
+  {de:"das Wohnzimmer",tr:"oturma odası",cat:"Ev",type:"isim"},
+  {de:"das Schlafzimmer",tr:"yatak odası",cat:"Ev",type:"isim"},
+  {de:"der Flur",tr:"koridor / hol",cat:"Ev",type:"isim"},
+  {de:"der Balkon",tr:"balkon",cat:"Ev",type:"isim"},
+  {de:"der Keller",tr:"bodrum kat",cat:"Ev",type:"isim"},
   {de:"der Schlüssel",tr:"anahtar",cat:"Ev",type:"isim"},
   {de:"die Miete",tr:"kira",cat:"Ev",type:"isim"},
-  {de:"der Vermieter",tr:"kiralayan / ev sahibi",cat:"Ev",type:"isim"},
+  {de:"der Vermieter",tr:"ev sahibi",cat:"Ev",type:"isim"},
+  {de:"die Heizung",tr:"ısıtma / kalorifer",cat:"Ev",type:"isim"},
+  {de:"der Strom",tr:"elektrik",cat:"Ev",type:"isim"},
+  {de:"das Wasser",tr:"su",cat:"Ev",type:"isim"},
+  {de:"der Tisch",tr:"masa",cat:"Ev",type:"isim"},
+  {de:"der Stuhl",tr:"sandalye",cat:"Ev",type:"isim"},
+  {de:"das Bett",tr:"yatak",cat:"Ev",type:"isim"},
+  {de:"der Schrank",tr:"dolap",cat:"Ev",type:"isim"},
+  {de:"die Lampe",tr:"lamba",cat:"Ev",type:"isim"},
+  {de:"das Fenster",tr:"pencere",cat:"Ev",type:"isim"},
+  {de:"die Tür",tr:"kapı",cat:"Ev",type:"isim"},
+
+  // ── AİLE ──────────────────────────────────────
   {de:"die Familie",tr:"aile",cat:"Aile",type:"isim"},
   {de:"die Mutter",tr:"anne",cat:"Aile",type:"isim"},
   {de:"der Vater",tr:"baba",cat:"Aile",type:"isim"},
   {de:"das Kind",tr:"çocuk",cat:"Aile",type:"isim"},
-  // İş
+  {de:"der Bruder",tr:"erkek kardeş",cat:"Aile",type:"isim"},
+  {de:"die Schwester",tr:"kız kardeş",cat:"Aile",type:"isim"},
+  {de:"der Großvater",tr:"büyükbaba",cat:"Aile",type:"isim"},
+  {de:"die Großmutter",tr:"büyükanne",cat:"Aile",type:"isim"},
+  {de:"der Mann",tr:"adam / koca",cat:"Aile",type:"isim"},
+  {de:"die Frau",tr:"kadın / eş",cat:"Aile",type:"isim"},
+  {de:"der Sohn",tr:"oğul",cat:"Aile",type:"isim"},
+  {de:"die Tochter",tr:"kız (evlat)",cat:"Aile",type:"isim"},
+  {de:"der Onkel",tr:"amca / dayı / enişte",cat:"Aile",type:"isim"},
+  {de:"die Tante",tr:"hala / teyze",cat:"Aile",type:"isim"},
+
+  // ── İŞ ──────────────────────────────────────
   {de:"die Arbeit",tr:"iş",cat:"İş",type:"isim"},
   {de:"der Beruf",tr:"meslek",cat:"İş",type:"isim"},
   {de:"das Büro",tr:"ofis",cat:"İş",type:"isim"},
   {de:"der Chef",tr:"patron / şef",cat:"İş",type:"isim"},
   {de:"das Gehalt",tr:"maaş",cat:"İş",type:"isim"},
   {de:"die Stelle",tr:"pozisyon / iş yeri",cat:"İş",type:"isim"},
-  {de:"der Kollege",tr:"iş arkadaşı",cat:"İş",type:"isim"},
+  {de:"der Kollege",tr:"iş arkadaşı (erkek)",cat:"İş",type:"isim"},
+  {de:"die Kollegin",tr:"iş arkadaşı (kadın)",cat:"İş",type:"isim"},
   {de:"die Bewerbung",tr:"iş başvurusu",cat:"İş",type:"isim"},
-  // Yiyecek
+  {de:"das Vorstellungsgespräch",tr:"iş görüşmesi",cat:"İş",type:"isim"},
+  {de:"der Lebenslauf",tr:"özgeçmiş",cat:"İş",type:"isim"},
+  {de:"die Erfahrung",tr:"deneyim / tecrübe",cat:"İş",type:"isim"},
+  {de:"die Ausbildung",tr:"eğitim / meslek eğitimi",cat:"İş",type:"isim"},
+  {de:"der Urlaub",tr:"tatil / izin",cat:"İş",type:"isim"},
+  {de:"die Kündigung",tr:"işten çıkarma / istifa",cat:"İş",type:"isim"},
+  {de:"der Vertrag",tr:"sözleşme",cat:"İş",type:"isim"},
+
+  // ── YİYECEK & İÇECEK ──────────────────────────────────────
   {de:"das Essen",tr:"yemek",cat:"Yiyecek",type:"isim"},
   {de:"das Brot",tr:"ekmek",cat:"Yiyecek",type:"isim"},
-  {de:"das Wasser",tr:"su",cat:"Yiyecek",type:"isim"},
+  {de:"das Brötchen",tr:"küçük ekmek / francala",cat:"Yiyecek",type:"isim"},
   {de:"der Kaffee",tr:"kahve",cat:"Yiyecek",type:"isim"},
+  {de:"der Tee",tr:"çay",cat:"Yiyecek",type:"isim"},
+  {de:"das Bier",tr:"bira",cat:"Yiyecek",type:"isim"},
+  {de:"der Wein",tr:"şarap",cat:"Yiyecek",type:"isim"},
+  {de:"der Saft",tr:"meyve suyu",cat:"Yiyecek",type:"isim"},
+  {de:"die Milch",tr:"süt",cat:"Yiyecek",type:"isim"},
   {de:"das Fleisch",tr:"et",cat:"Yiyecek",type:"isim"},
-  // Zaman
+  {de:"der Fisch",tr:"balık",cat:"Yiyecek",type:"isim"},
+  {de:"das Hähnchen",tr:"tavuk",cat:"Yiyecek",type:"isim"},
+  {de:"das Gemüse",tr:"sebze",cat:"Yiyecek",type:"isim"},
+  {de:"das Obst",tr:"meyve",cat:"Yiyecek",type:"isim"},
+  {de:"der Apfel",tr:"elma",cat:"Yiyecek",type:"isim"},
+  {de:"die Banane",tr:"muz",cat:"Yiyecek",type:"isim"},
+  {de:"die Tomate",tr:"domates",cat:"Yiyecek",type:"isim"},
+  {de:"die Kartoffel",tr:"patates",cat:"Yiyecek",type:"isim"},
+  {de:"die Zwiebel",tr:"soğan",cat:"Yiyecek",type:"isim"},
+  {de:"der Käse",tr:"peynir",cat:"Yiyecek",type:"isim"},
+  {de:"das Ei",tr:"yumurta",cat:"Yiyecek",type:"isim"},
+  {de:"die Butter",tr:"tereyağı",cat:"Yiyecek",type:"isim"},
+  {de:"der Zucker",tr:"şeker",cat:"Yiyecek",type:"isim"},
+  {de:"das Salz",tr:"tuz",cat:"Yiyecek",type:"isim"},
+  {de:"das Öl",tr:"yağ",cat:"Yiyecek",type:"isim"},
+  {de:"die Suppe",tr:"çorba",cat:"Yiyecek",type:"isim"},
+  {de:"der Kuchen",tr:"kek / pasta",cat:"Yiyecek",type:"isim"},
+
+  // ── ZAMAN ──────────────────────────────────────
   {de:"heute",tr:"bugün",cat:"Zaman",type:"zarf"},
   {de:"morgen",tr:"yarın",cat:"Zaman",type:"zarf"},
   {de:"gestern",tr:"dün",cat:"Zaman",type:"zarf"},
   {de:"jetzt",tr:"şimdi",cat:"Zaman",type:"zarf"},
+  {de:"später",tr:"sonra / daha sonra",cat:"Zaman",type:"zarf"},
+  {de:"früher",tr:"daha önce / eskiden",cat:"Zaman",type:"zarf"},
+  {de:"bald",tr:"yakında",cat:"Zaman",type:"zarf"},
+  {de:"immer",tr:"her zaman / daima",cat:"Zaman",type:"zarf"},
+  {de:"nie",tr:"asla / hiçbir zaman",cat:"Zaman",type:"zarf"},
+  {de:"manchmal",tr:"bazen",cat:"Zaman",type:"zarf"},
+  {de:"oft",tr:"sık sık / çoğunlukla",cat:"Zaman",type:"zarf"},
+  {de:"selten",tr:"nadiren",cat:"Zaman",type:"zarf"},
   {de:"die Woche",tr:"hafta",cat:"Zaman",type:"isim"},
   {de:"der Monat",tr:"ay",cat:"Zaman",type:"isim"},
   {de:"das Jahr",tr:"yıl",cat:"Zaman",type:"isim"},
-  // Bürokrasi
-  {de:"die Anmeldung",tr:"adres kaydı (Einwohnermeldeamt)",cat:"Bürokrasi",type:"isim"},
+  {de:"die Stunde",tr:"saat (60 dakika)",cat:"Zaman",type:"isim"},
+  {de:"die Minute",tr:"dakika",cat:"Zaman",type:"isim"},
+  {de:"der Tag",tr:"gün",cat:"Zaman",type:"isim"},
+  {de:"die Nacht",tr:"gece",cat:"Zaman",type:"isim"},
+  {de:"der Morgen",tr:"sabah",cat:"Zaman",type:"isim"},
+  {de:"der Abend",tr:"akşam",cat:"Zaman",type:"isim"},
+
+  // ── BÜROKRASİ ──────────────────────────────────────
+  {de:"die Anmeldung",tr:"adres kaydı",cat:"Bürokrasi",type:"isim"},
   {de:"der Ausweis",tr:"kimlik belgesi",cat:"Bürokrasi",type:"isim"},
+  {de:"der Pass",tr:"pasaport",cat:"Bürokrasi",type:"isim"},
   {de:"die Krankenkasse",tr:"sağlık sigortası",cat:"Bürokrasi",type:"isim"},
   {de:"das Finanzamt",tr:"vergi dairesi",cat:"Bürokrasi",type:"isim"},
   {de:"der Termin",tr:"randevu",cat:"Bürokrasi",type:"isim"},
-  {de:"ausfüllen",tr:"form doldurmak",cat:"Bürokrasi",type:"fiil"},
-  {de:"unterschreiben",tr:"imzalamak",cat:"Bürokrasi",type:"fiil"},
   {de:"das Formular",tr:"form / dilekçe",cat:"Bürokrasi",type:"isim"},
-];
+  {de:"die Behörde",tr:"resmi kurum / idare",cat:"Bürokrasi",type:"isim"},
+  {de:"das Amt",tr:"daire / ofis (resmi)",cat:"Bürokrasi",type:"isim"},
+  {de:"die Genehmigung",tr:"izin / onay",cat:"Bürokrasi",type:"isim"},
+  {de:"der Antrag",tr:"başvuru / dilekçe",cat:"Bürokrasi",type:"isim"},
+  {de:"die Versicherung",tr:"sigorta",cat:"Bürokrasi",type:"isim"},
+  {de:"die Steuer",tr:"vergi",cat:"Bürokrasi",type:"isim"},
+  {de:"die Aufenthaltserlaubnis",tr:"oturma izni",cat:"Bürokrasi",type:"isim"},
+  {de:"die Krankenversicherungskarte",tr:"sağlık sigortası kartı",cat:"Bürokrasi",type:"isim"},
 
+  // ── SAĞLIK ──────────────────────────────────────
+  {de:"der Arzt",tr:"doktor (erkek)",cat:"Sağlık",type:"isim"},
+  {de:"die Ärztin",tr:"doktor (kadın)",cat:"Sağlık",type:"isim"},
+  {de:"das Krankenhaus",tr:"hastane",cat:"Sağlık",type:"isim"},
+  {de:"die Apotheke",tr:"eczane",cat:"Sağlık",type:"isim"},
+  {de:"das Medikament",tr:"ilaç",cat:"Sağlık",type:"isim"},
+  {de:"das Rezept",tr:"reçete",cat:"Sağlık",type:"isim"},
+  {de:"die Schmerzen",tr:"ağrı / acı",cat:"Sağlık",type:"isim"},
+  {de:"das Fieber",tr:"ateş",cat:"Sağlık",type:"isim"},
+  {de:"der Husten",tr:"öksürük",cat:"Sağlık",type:"isim"},
+  {de:"der Schnupfen",tr:"nezle / burun akıntısı",cat:"Sağlık",type:"isim"},
+  {de:"die Erkältung",tr:"soğuk algınlığı",cat:"Sağlık",type:"isim"},
+  {de:"der Kopfschmerz",tr:"baş ağrısı",cat:"Sağlık",type:"isim"},
+  {de:"der Bauchschmerz",tr:"karın ağrısı",cat:"Sağlık",type:"isim"},
+  {de:"krank",tr:"hasta",cat:"Sağlık",type:"sıfat"},
+  {de:"gesund",tr:"sağlıklı",cat:"Sağlık",type:"sıfat"},
+
+  // ── ULAŞIM ──────────────────────────────────────
+  {de:"der Bus",tr:"otobüs",cat:"Ulaşım",type:"isim"},
+  {de:"die U-Bahn",tr:"metro",cat:"Ulaşım",type:"isim"},
+  {de:"die S-Bahn",tr:"banliyö treni",cat:"Ulaşım",type:"isim"},
+  {de:"der Zug",tr:"tren",cat:"Ulaşım",type:"isim"},
+  {de:"das Auto",tr:"araba",cat:"Ulaşım",type:"isim"},
+  {de:"das Fahrrad",tr:"bisiklet",cat:"Ulaşım",type:"isim"},
+  {de:"das Taxi",tr:"taksi",cat:"Ulaşım",type:"isim"},
+  {de:"das Flugzeug",tr:"uçak",cat:"Ulaşım",type:"isim"},
+  {de:"der Bahnhof",tr:"tren istasyonu",cat:"Ulaşım",type:"isim"},
+  {de:"der Flughafen",tr:"havalimanı",cat:"Ulaşım",type:"isim"},
+  {de:"die Haltestelle",tr:"durak",cat:"Ulaşım",type:"isim"},
+  {de:"die Straße",tr:"sokak / cadde",cat:"Ulaşım",type:"isim"},
+  {de:"links",tr:"sol / sola",cat:"Ulaşım",type:"zarf"},
+  {de:"rechts",tr:"sağ / sağa",cat:"Ulaşım",type:"zarf"},
+  {de:"geradeaus",tr:"düz / doğru",cat:"Ulaşım",type:"zarf"},
+
+  // ── ALIŞVERİŞ ──────────────────────────────────────
+  {de:"der Supermarkt",tr:"süpermarket",cat:"Alışveriş",type:"isim"},
+  {de:"das Geschäft",tr:"dükkan / mağaza",cat:"Alışveriş",type:"isim"},
+  {de:"der Preis",tr:"fiyat",cat:"Alışveriş",type:"isim"},
+  {de:"teuer",tr:"pahalı",cat:"Alışveriş",type:"sıfat"},
+  {de:"günstig",tr:"ucuz / ekonomik",cat:"Alışveriş",type:"sıfat"},
+  {de:"billig",tr:"ucuz / kalitesiz",cat:"Alışveriş",type:"sıfat"},
+  {de:"der Rabatt",tr:"indirim",cat:"Alışveriş",type:"isim"},
+  {de:"die Quittung",tr:"fiş / makbuz",cat:"Alışveriş",type:"isim"},
+  {de:"die Kasse",tr:"kasa",cat:"Alışveriş",type:"isim"},
+  {de:"bar",tr:"nakit",cat:"Alışveriş",type:"sıfat"},
+  {de:"die Karte",tr:"kart",cat:"Alışveriş",type:"isim"},
+  {de:"die Größe",tr:"beden / boyut",cat:"Alışveriş",type:"isim"},
+
+  // ── OKUL & EĞİTİM ──────────────────────────────────────
+  {de:"die Schule",tr:"okul",cat:"Eğitim",type:"isim"},
+  {de:"die Universität",tr:"üniversite",cat:"Eğitim",type:"isim"},
+  {de:"der Lehrer",tr:"öğretmen (erkek)",cat:"Eğitim",type:"isim"},
+  {de:"die Lehrerin",tr:"öğretmen (kadın)",cat:"Eğitim",type:"isim"},
+  {de:"der Student",tr:"öğrenci (erkek)",cat:"Eğitim",type:"isim"},
+  {de:"die Studentin",tr:"öğrenci (kadın)",cat:"Eğitim",type:"isim"},
+  {de:"das Buch",tr:"kitap",cat:"Eğitim",type:"isim"},
+  {de:"das Heft",tr:"defter",cat:"Eğitim",type:"isim"},
+  {de:"der Stift",tr:"kalem",cat:"Eğitim",type:"isim"},
+  {de:"die Prüfung",tr:"sınav",cat:"Eğitim",type:"isim"},
+  {de:"die Note",tr:"not / puan",cat:"Eğitim",type:"isim"},
+  {de:"die Hausaufgabe",tr:"ev ödevi",cat:"Eğitim",type:"isim"},
+  {de:"der Kurs",tr:"kurs",cat:"Eğitim",type:"isim"},
+  {de:"das Zeugnis",tr:"okul karnesi / diploma",cat:"Eğitim",type:"isim"},
+
+  // ── BANKA & PARA ──────────────────────────────────────
+  {de:"die Bank",tr:"banka",cat:"Banka",type:"isim"},
+  {de:"das Konto",tr:"hesap",cat:"Banka",type:"isim"},
+  {de:"das Geld",tr:"para",cat:"Banka",type:"isim"},
+  {de:"der Euro",tr:"Euro",cat:"Banka",type:"isim"},
+  {de:"der Cent",tr:"cent",cat:"Banka",type:"isim"},
+  {de:"die Überweisung",tr:"havale / transfer",cat:"Banka",type:"isim"},
+  {de:"der Geldautomat",tr:"ATM / bankamatik",cat:"Banka",type:"isim"},
+  {de:"die Gebühr",tr:"ücret / masraf",cat:"Banka",type:"isim"},
+  {de:"das Kleingeld",tr:"bozuk para",cat:"Banka",type:"isim"},
+
+  // ── HAVA & TABİAT ──────────────────────────────────────
+  {de:"das Wetter",tr:"hava durumu",cat:"Hava",type:"isim"},
+  {de:"die Sonne",tr:"güneş",cat:"Hava",type:"isim"},
+  {de:"der Regen",tr:"yağmur",cat:"Hava",type:"isim"},
+  {de:"der Schnee",tr:"kar",cat:"Hava",type:"isim"},
+  {de:"der Wind",tr:"rüzgar",cat:"Hava",type:"isim"},
+  {de:"die Wolke",tr:"bulut",cat:"Hava",type:"isim"},
+  {de:"kalt",tr:"soğuk",cat:"Hava",type:"sıfat"},
+  {de:"warm",tr:"sıcak / ılık",cat:"Hava",type:"sıfat"},
+  {de:"heiß",tr:"çok sıcak / kavurucu",cat:"Hava",type:"sıfat"},
+  {de:"sonnig",tr:"güneşli",cat:"Hava",type:"sıfat"},
+  {de:"bewölkt",tr:"bulutlu",cat:"Hava",type:"sıfat"},
+  {de:"der Frühling",tr:"ilkbahar",cat:"Hava",type:"isim"},
+  {de:"der Sommer",tr:"yaz",cat:"Hava",type:"isim"},
+  {de:"der Herbst",tr:"sonbahar",cat:"Hava",type:"isim"},
+  {de:"der Winter",tr:"kış",cat:"Hava",type:"isim"},
+
+  // ── DUYGULAR & KİŞİLİK ──────────────────────────────────────
+  {de:"froh",tr:"mutlu / sevinçli",cat:"Duygular",type:"sıfat"},
+  {de:"traurig",tr:"üzgün / kederli",cat:"Duygular",type:"sıfat"},
+  {de:"müde",tr:"yorgun / uyuklu",cat:"Duygular",type:"sıfat"},
+  {de:"glücklich",tr:"mutlu / bahtiyar",cat:"Duygular",type:"sıfat"},
+  {de:"nervös",tr:"sinirli / gergin",cat:"Duygular",type:"sıfat"},
+  {de:"ruhig",tr:"sakin / sessiz",cat:"Duygular",type:"sıfat"},
+  {de:"aufgeregt",tr:"heyecanlı",cat:"Duygular",type:"sıfat"},
+  {de:"ängstlich",tr:"endişeli / korkmuş",cat:"Duygular",type:"sıfat"},
+  {de:"zufrieden",tr:"memnun / tatmin olmuş",cat:"Duygular",type:"sıfat"},
+  {de:"stolz",tr:"gururlu",cat:"Duygular",type:"sıfat"},
+  {de:"die Freude",tr:"sevinç / mutluluk",cat:"Duygular",type:"isim"},
+  {de:"die Angst",tr:"korku / endişe",cat:"Duygular",type:"isim"},
+  {de:"die Hoffnung",tr:"umut",cat:"Duygular",type:"isim"},
+
+  // ── SIFATLAR ──────────────────────────────────────
+  {de:"groß",tr:"büyük / uzun boylu",cat:"Sıfatlar",type:"sıfat"},
+  {de:"klein",tr:"küçük / kısa boylu",cat:"Sıfatlar",type:"sıfat"},
+  {de:"neu",tr:"yeni",cat:"Sıfatlar",type:"sıfat"},
+  {de:"alt",tr:"eski / yaşlı",cat:"Sıfatlar",type:"sıfat"},
+  {de:"jung",tr:"genç",cat:"Sıfatlar",type:"sıfat"},
+  {de:"schön",tr:"güzel / hoş",cat:"Sıfatlar",type:"sıfat"},
+  {de:"hässlich",tr:"çirkin",cat:"Sıfatlar",type:"sıfat"},
+  {de:"schnell",tr:"hızlı",cat:"Sıfatlar",type:"sıfat"},
+  {de:"langsam",tr:"yavaş",cat:"Sıfatlar",type:"sıfat"},
+  {de:"leicht",tr:"kolay / hafif",cat:"Sıfatlar",type:"sıfat"},
+  {de:"schwer",tr:"zor / ağır",cat:"Sıfatlar",type:"sıfat"},
+  {de:"richtig",tr:"doğru / doğru olan",cat:"Sıfatlar",type:"sıfat"},
+  {de:"falsch",tr:"yanlış",cat:"Sıfatlar",type:"sıfat"},
+  {de:"wichtig",tr:"önemli",cat:"Sıfatlar",type:"sıfat"},
+  {de:"interessant",tr:"ilginç / ilgi çekici",cat:"Sıfatlar",type:"sıfat"},
+  {de:"langweilig",tr:"sıkıcı",cat:"Sıfatlar",type:"sıfat"},
+  {de:"lustig",tr:"komik / eğlenceli",cat:"Sıfatlar",type:"sıfat"},
+  {de:"lecker",tr:"lezzetli",cat:"Sıfatlar",type:"sıfat"},
+  {de:"sauber",tr:"temiz",cat:"Sıfatlar",type:"sıfat"},
+  {de:"schmutzig",tr:"kirli",cat:"Sıfatlar",type:"sıfat"},
+  {de:"laut",tr:"gürültülü / yüksek sesli",cat:"Sıfatlar",type:"sıfat"},
+  {de:"leise",tr:"sessiz / alçak sesli",cat:"Sıfatlar",type:"sıfat"},
+  {de:"voll",tr:"dolu",cat:"Sıfatlar",type:"sıfat"},
+  {de:"leer",tr:"boş",cat:"Sıfatlar",type:"sıfat"},
+  {de:"offen",tr:"açık",cat:"Sıfatlar",type:"sıfat"},
+  {de:"geschlossen",tr:"kapalı",cat:"Sıfatlar",type:"sıfat"},
+];
 const alphabet = [
   {l:"A a",s:"ah",ex:"Apfel"},
   {l:"B b",s:"beh",ex:"Brot"},
@@ -1918,6 +2329,8 @@ function nav(page) {
   if (page==='plan') renderPlan();
   if (page==='chat') renderChatTip();
   if (page==='program') renderProg();
+  if (page==='game') initGame();
+  if (page==='writing') initWriting();
   if (page==='home') updateUI();
   recSession();
   setMnav(page);
@@ -2683,6 +3096,278 @@ function openMore() {
 }
 function closeMore() {
   document.getElementById('more-overlay').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════════
+   KELIME OYUNU
+═══════════════════════════════════════════════════ */
+let gTimer=null, gScore=0, gStreak=0, gTime=30, gBusy=false;
+
+function initGame() {
+  clearInterval(gTimer);
+  gScore=0; gStreak=0; gTime=30; gBusy=false;
+  document.getElementById('g-score').textContent='0';
+  document.getElementById('g-streak').textContent='0';
+  document.getElementById('g-timer').textContent='30';
+  document.getElementById('game-word').textContent='';
+  document.getElementById('game-opts').innerHTML='';
+  document.getElementById('game-start').style.display='block';
+  document.getElementById('game-result').style.display='none';
+}
+
+function startGame() {
+  document.getElementById('game-start').style.display='none';
+  document.getElementById('game-result').style.display='none';
+  gScore=0; gStreak=0; gTime=30; gBusy=false;
+  document.getElementById('g-score').textContent='0';
+  document.getElementById('g-streak').textContent='0';
+  document.getElementById('g-timer').textContent='30';
+  nextGameWord();
+  gTimer = setInterval(()=>{
+    gTime--;
+    document.getElementById('g-timer').textContent=gTime;
+    if(gTime<=0){ clearInterval(gTimer); endGame(); }
+  },1000);
+}
+
+function nextGameWord() {
+  if(gBusy) return;
+  const pool = vocabulary.filter(v=>v.tr && v.de);
+  const correct = pool[Math.floor(Math.random()*pool.length)];
+  document.getElementById('game-word').textContent = correct.de;
+
+  // 3 yanlış + 1 doğru cevap
+  let wrongs = [];
+  while(wrongs.length < 3) {
+    const w = pool[Math.floor(Math.random()*pool.length)];
+    if(w.tr !== correct.tr && !wrongs.find(x=>x.tr===w.tr)) wrongs.push(w);
+  }
+  const opts = [...wrongs, correct].sort(()=>Math.random()-.5);
+  const el = document.getElementById('game-opts');
+  el.innerHTML = opts.map(o=>`
+    <button onclick="gameAnswer(this,'${o.tr.replace(/'/g,"\\'")}','${correct.tr.replace(/'/g,"\\'")}',${correct.de===o.de})"
+      style="background:var(--bg);border:2px solid var(--border);border-radius:12px;padding:12px 10px;
+      font-size:13px;font-weight:700;color:var(--text);cursor:pointer;font-family:Nunito,sans-serif;
+      transition:all .15s;text-align:center">
+      ${o.tr}
+    </button>`).join('');
+}
+
+function gameAnswer(btn, chosen, correct, isCorrect) {
+  if(gBusy) return;
+  gBusy=true;
+  const btns = document.getElementById('game-opts').querySelectorAll('button');
+  btns.forEach(b=>{
+    if(b.textContent.trim()===correct) b.style.background='#dcfce7', b.style.borderColor='var(--green)';
+  });
+  if(isCorrect) {
+    btn.style.background='#dcfce7'; btn.style.borderColor='var(--green)';
+    gScore+=10; gStreak++;
+    if(gStreak>=3) gScore+=5; // bonus
+    document.getElementById('g-score').textContent=gScore;
+    document.getElementById('g-streak').textContent=gStreak;
+  } else {
+    btn.style.background='#fee2e2'; btn.style.borderColor='var(--red)';
+    gStreak=0;
+    document.getElementById('g-streak').textContent='0';
+  }
+  setTimeout(()=>{ gBusy=false; nextGameWord(); },600);
+}
+
+function endGame() {
+  document.getElementById('game-word').textContent='⏱️';
+  document.getElementById('game-opts').innerHTML='';
+  document.getElementById('game-result').style.display='block';
+  document.getElementById('g-final-score').textContent=`Toplam Puan: ${gScore}`;
+  let msg = gScore>=200 ? '🏆 Mükemmel! Harika bir performans!' :
+            gScore>=100 ? '⭐ Çok iyi! Devam et!' :
+            gScore>=50  ? '💪 İyi başlangıç! Pratik yap!' : '📚 Daha fazla kelime öğren!';
+  document.getElementById('g-final-msg').textContent=msg;
+  addXP(Math.floor(gScore/10)); save(); updateUI();
+  toast(`Oyun bitti! ${gScore} puan → +${Math.floor(gScore/10)} XP`,'success');
+}
+
+/* ═══════════════════════════════════════════════════
+   YAZMA EGZERSİZİ
+═══════════════════════════════════════════════════ */
+const writingExercises = [
+  {tr:"Günaydın, adım Arif.",de:"Guten Morgen, ich heiße Arif.",hint:"Guten Morgen = Günaydın, ich heiße = adım"},
+  {tr:"Türkiye'den geliyorum.",de:"Ich komme aus der Türkei.",hint:"kommen aus = -den gelmek"},
+  {tr:"Almanca öğrenmek istiyorum.",de:"Ich möchte Deutsch lernen.",hint:"möchten + infinitiv sona gider"},
+  {tr:"Bugün hava çok güzel.",de:"Heute ist das Wetter sehr schön.",hint:"heute = bugün, schön = güzel"},
+  {tr:"Bir kahve istiyorum lütfen.",de:"Ich möchte einen Kaffee, bitte.",hint:"Kaffee eril → einen"},
+  {tr:"Nerede oturuyorsunuz?",de:"Wo wohnen Sie?",hint:"wohnen = oturmak/yaşamak"},
+  {tr:"Doktora gitmem gerekiyor.",de:"Ich muss zum Arzt gehen.",hint:"müssen + gehen sona gider"},
+  {tr:"Bu çok pahalı.",de:"Das ist zu teuer.",hint:"zu = çok (fazla)"},
+  {tr:"Saat kaç?",de:"Wie spät ist es?",hint:"spät = geç/saat"},
+  {tr:"Almanya'ya taşınmak istiyorum.",de:"Ich möchte nach Deutschland ziehen.",hint:"nach = -e (ülkeler için), ziehen = taşınmak"},
+  {tr:"Adres kaydı yaptırmam lazım.",de:"Ich muss mich anmelden.",hint:"anmelden = kayıt yaptırmak, sich = kendini"},
+  {tr:"Randevu almak istiyorum.",de:"Ich möchte einen Termin machen.",hint:"Termin = randevu, eril → einen"},
+  {tr:"Bunu anlamıyorum.",de:"Ich verstehe das nicht.",hint:"verstehen = anlamak, nicht = değil sona gider"},
+  {tr:"Tekrar eder misiniz?",de:"Können Sie das wiederholen?",hint:"wiederholen = tekrarlamak, modal → sona"},
+  {tr:"Çok teşekkür ederim.",de:"Vielen Dank! / Danke schön!",hint:"vielen = çok (teşekkürde)"},
+  {tr:"Berlin'de yaşıyorum.",de:"Ich wohne in Berlin.",hint:"in + şehir adı"},
+  {tr:"Kartla ödeyebilir miyim?",de:"Kann ich mit Karte zahlen?",hint:"mit Karte = kartla, zahlen = ödemek"},
+  {tr:"Yarın görüşürüz.",de:"Bis morgen!",hint:"bis = -e kadar/görüşmek üzere"},
+  {tr:"Bu iş başvurusu için yazıyorum.",de:"Ich schreibe wegen der Bewerbung.",hint:"wegen + Genitiv = -den dolayı"},
+  {tr:"Ateşim var ve başım ağrıyor.",de:"Ich habe Fieber und Kopfschmerzen.",hint:"haben = sahip olmak/var olmak"},
+];
+
+let wIdx=0, wScore=0, wTotal=0;
+
+function initWriting() {
+  wIdx=0; wScore=0; wTotal=0;
+  renderWriting();
+}
+
+function renderWriting() {
+  const ex = writingExercises[wIdx];
+  document.getElementById('writing-container').innerHTML = `
+    <div class="panel" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-dim)">${wIdx+1} / ${writingExercises.length}</div>
+        <div style="font-size:13px;font-weight:800;color:var(--green)">✓ ${wScore} doğru</div>
+      </div>
+      <div style="background:var(--accent-bg);border:1.5px solid rgba(79,70,229,.3);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Türkçe → Almancaya Çevir</div>
+        <div style="font-size:20px;font-weight:900;color:var(--text)">${ex.tr}</div>
+      </div>
+      <textarea id="w-input" placeholder="Almanca cevabını buraya yaz..." rows="3"
+        style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+        padding:12px;font-size:15px;font-weight:600;color:var(--text);font-family:Nunito,sans-serif;
+        resize:none;outline:none;box-sizing:border-box;transition:border-color .2s"
+        onfocus="this.style.borderColor='var(--accent)'"
+        onblur="this.style.borderColor='var(--border)'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();checkWriting();}"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="checkWriting()" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif">Kontrol Et ✓</button>
+        <button onclick="showHint()" style="background:var(--yellow-bg);color:var(--yellow);border:1.5px solid var(--yellow-border);border-radius:10px;padding:12px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif">💡</button>
+      </div>
+      <div id="w-hint" style="display:none;margin-top:10px;background:var(--yellow-bg);border:1.5px solid var(--yellow-border);border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--text)">💡 İpucu: ${ex.hint}</div>
+      <div id="w-feedback" style="display:none;margin-top:10px"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      ${wIdx>0?`<button onclick="wIdx--;renderWriting()" style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;color:var(--text)">← Önceki</button>`:''}
+      ${wIdx<writingExercises.length-1?`<button onclick="nextWriting()" style="flex:2;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;color:var(--text)">Sonraki →</button>`:''}
+    </div>
+  `;
+}
+
+function showHint() {
+  document.getElementById('w-hint').style.display='block';
+}
+
+function checkWriting() {
+  const inp = document.getElementById('w-input');
+  const answer = inp?.value.trim();
+  if(!answer) return;
+  const ex = writingExercises[wIdx];
+  // Benzerlik kontrolü - büyük/küçük harf, noktalama görmezden gel
+  const normalize = s => s.toLowerCase().replace(/[.,!?]/g,'').trim();
+  const correct = normalize(ex.de);
+  const given = normalize(answer);
+  const isCorrect = correct === given ||
+    correct.split('/').map(s=>s.trim()).some(s=>s===given);
+
+  // Kısmi doğruluk — %70+ kelime örtüşmesi
+  const cWords = correct.split(' ');
+  const gWords = given.split(' ');
+  const matches = gWords.filter(w=>cWords.includes(w)).length;
+  const partial = matches/cWords.length >= 0.7;
+
+  const fb = document.getElementById('w-feedback');
+  fb.style.display='block';
+  if(isCorrect) {
+    wScore++; wTotal++;
+    inp.style.borderColor='var(--green)';
+    fb.innerHTML=`<div style="background:var(--green-bg);border:1.5px solid var(--green-border);border-radius:10px;padding:12px 14px">
+      <div style="font-weight:800;color:var(--green);font-size:14px">✓ Harika! Doğru!</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-top:4px">${ex.de}</div>
+    </div>`;
+    addXP(10); save();
+    setTimeout(()=>nextWriting(), 1500);
+  } else if(partial) {
+    wTotal++;
+    inp.style.borderColor='var(--yellow)';
+    fb.innerHTML=`<div style="background:var(--yellow-bg);border:1.5px solid var(--yellow-border);border-radius:10px;padding:12px 14px">
+      <div style="font-weight:800;color:var(--yellow);font-size:14px">~ Yakın! Ama tam değil.</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-top:4px">Doğrusu: <strong>${ex.de}</strong></div>
+    </div>`;
+    addXP(5); save();
+  } else {
+    wTotal++;
+    inp.style.borderColor='var(--red)';
+    fb.innerHTML=`<div style="background:var(--red-bg);border:1.5px solid var(--red-border);border-radius:10px;padding:12px 14px">
+      <div style="font-weight:800;color:var(--red);font-size:14px">✗ Yanlış</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-top:4px">Doğrusu: <strong>${ex.de}</strong></div>
+    </div>`;
+  }
+}
+
+function nextWriting() {
+  if(wIdx < writingExercises.length-1) {
+    wIdx++;
+    renderWriting();
+  } else {
+    // Bitti
+    document.getElementById('writing-container').innerHTML=`
+      <div class="panel" style="text-align:center;padding:32px">
+        <div style="font-size:48px;margin-bottom:16px">🎉</div>
+        <div style="font-size:22px;font-weight:900;color:var(--accent)">Tebrikler!</div>
+        <div style="font-size:15px;color:var(--text-mid);margin:10px 0">${wScore} / ${writingExercises.length} doğru</div>
+        <button onclick="initWriting()" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px 32px;font-size:15px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;margin-top:16px">🔄 Tekrar Başla</button>
+      </div>`;
+    addXP(20); save(); updateUI();
+    toast(`Yazma egzersizi tamamlandı! +20 XP`,'success');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   BİLDİRİM (PWA)
+═══════════════════════════════════════════════════ */
+function requestNotifPermission() {
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted') {
+    scheduleNotif();
+  } else if(Notification.permission !== 'denied') {
+    Notification.requestPermission().then(p => {
+      if(p==='granted') { scheduleNotif(); toast('🔔 Günlük hatırlatıcı aktif!','success'); }
+    });
+  }
+}
+function scheduleNotif() {
+  // Service worker yoksa basit localStorage ile simüle et
+  localStorage.setItem('notif_enabled','1');
+}
+// Sayfa açılışında hatırlatıcı kontrolü
+(function checkDailyNotif(){
+  const last = localStorage.getItem('last_notif_day');
+  const today = new Date().toDateString();
+  if(last !== today && localStorage.getItem('notif_enabled')==='1') {
+    if(Notification.permission==='granted') {
+      new Notification('DeutschHız 🇩🇪', {
+        body: 'Bugünkü Almanca çalışmanı yapmayı unutma! 🎯',
+        icon: 'icon.png'
+      });
+      localStorage.setItem('last_notif_day', today);
+    }
+  }
+})();
+const chatInp = document.getElementById('chat-inp');
+if (chatInp) {
+  chatInp.addEventListener('focus', () => {
+    document.getElementById('mobile-nav')?.style.setProperty('display','none');
+    // Mesajları en alta kaydır
+    setTimeout(() => {
+      const msgs = document.getElementById('chat-msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    }, 300);
+  });
+  chatInp.addEventListener('blur', () => {
+    setTimeout(() => {
+      document.getElementById('mobile-nav')?.style.removeProperty('display');
+    }, 150);
+  });
 }
 
 load(); loadTheme(); calcStreak(); updateUI(); recSession();
