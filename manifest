@@ -1,0 +1,15 @@
+{
+  "name": "DeutschHız",
+  "short_name": "DeutschHız",
+  "start_url": "/almanca/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
